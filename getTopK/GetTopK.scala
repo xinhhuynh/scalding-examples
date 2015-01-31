@@ -6,6 +6,7 @@ class GetTopK(args : Args) extends Job(args) {
     // Tsv reads in columns as strings; we want the second field to be an Int.
     .map ('numField-> 'numFieldInt) {x:Int => x}
     .project('keyField, 'numFieldInt)
+    // This does the right thing by taking the top k in the mapper before reducing.
     .groupAll{_.sortedReverseTake[(Int, String)](('numFieldInt, 'keyField) -> 'top, args("topK").toInt)} 
     .flattenTo[(Int,String)]('top -> ('numFieldInt, 'keyField))
     .project(('keyField, 'numFieldInt))
